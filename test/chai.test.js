@@ -3,7 +3,12 @@ const expect = chai.expect;
 
 describe('chai test', ()=>{
   it('should compare some value', ()=> {
+   
     expect(1).to.equal(1);
+    console.log('ENV:', process.env.NODE_ENV)
+    if(process.env.NODE_ENV==='development') {
+      console.log('DEVELOPMENT_MODE')
+    }
   });
 
   it('should test some other stuff', () => {
@@ -16,5 +21,7 @@ describe('chai test', ()=>{
     expect('bar').to.be.a('string').with.lengthOf(3);
     expect([1,2,3].length).to.equal(3);
     expect(null).to.be.null;
+    expect(undefined).to.not.exist;
+    expect(1).to.exist;
   })
 })

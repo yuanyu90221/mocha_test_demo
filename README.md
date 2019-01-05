@@ -12,3 +12,6 @@
     "test": "./node_modules/.bin/cross-env NODE_ENV=development ./node_modules/.bin/mocha ./test/**/*.test.js"
   },
 `
+
+## run test case 
+`npm run mocha ${full_path_of_testfile}`

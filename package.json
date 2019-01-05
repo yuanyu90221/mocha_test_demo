@@ -4,14 +4,30 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/cross-env NODE_ENV=development ./node_modules/.bin/mocha ./test/**/*.test.js"
+    "test": "./node_modules/.bin/cross-env NODE_ENV=development ./node_modules/.bin/mocha ./test/**/*.test.js",
+    "t": "SET \"NODE_ENV=test\" && mocha lib/**/*.test.js  --reporter spec",
+    "coverage": "cross-env NODE_ENV=development nyc --reporter=text npm test",
+    "mocha": "./node_modules/.bin/cross-env NODE_ENV=development ./node_modules/.bin/mocha"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "cross-env": "^5.2.0",
-    "mocha": "^5.2.0"
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0",
+    "nyc": "^11.4.1",
+    "rewire": "^3.0.2",
+    "sinon": "^4.1.5",
+    "sinon-chai": "^2.14.0",
+    "supertest": "^3.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "crypto": "^1.0.1",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.2"
   }
 }

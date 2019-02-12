@@ -51,5 +51,18 @@ describe('users', ()=> {
         done();
       });
     });
+
+    it('it should catch error if there is one', (done) => {
+      sandbox.restore();
+      let stub = sandbox.stub(mongoose.Model, 'findById').yields(new Error('fake'));
+      users.get(123, (err, result)=>{
+        expect(result).to.not.exist;
+        expect(err).to.exist;
+        expect(err).to.be.instanceOf(Error);
+        expect(stub).to.have.been.calledWith(123);
+        expect(err.message).to.equal('fake');
+        done();
+      });
+    });
   })
 });

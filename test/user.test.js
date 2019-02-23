@@ -5,10 +5,12 @@ chai.use(chaiAsPromised);
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
+const rewire = require('rewire');
 
 const mongoose = require('mongoose');
-const users = require('../lib/users');
+let users = rewire('../lib/users');
 const User = require('../lib/models/user');
+const mailer = require('../lib/mailer');
 
 const sandbox = sinon.sandbox.create();
 describe('users', ()=> {
@@ -16,6 +18,7 @@ describe('users', ()=> {
   let sampleArgs;
   let sampleUser;
   let deleteStub;
+  let mailerStub;
 
   beforeEach(()=>{
     sampleUser = {
@@ -25,10 +28,12 @@ describe('users', ()=> {
     };
     findStub = sandbox.stub(mongoose.Model, 'findById').resolves(sampleUser);
     deleteStub = sandbox.stub(mongoose.Model, 'remove').resolves('fake_remove_result');
+    mailerStub = sandbox.stub(mailer, 'sendWelcomeEmail').resolves('fake_email');
   });
 
   afterEach(()=>{
     sandbox.restore();
+    users = rewire('../lib/users');
   });
 
   context('get', () => {
@@ -87,6 +92,42 @@ describe('users', ()=> {
 
       expect(result).to.equal('fake_remove_result');
       expect(deleteStub).to.have.been.calledWith({_id: 123});
+    });
+  });
+
+  context('create user', ()=> {
+    let FakeUserClass, saveStub, result;
+    beforeEach(async()=>{
+      saveStub = sandbox.stub().resolves(sampleUser);
+      FakeUserClass = sandbox.stub().returns({save: saveStub});
+    
+      users.__set__('User', FakeUserClass);
+      result = await users.create(sampleUser);
+    });
+
+    it('should reject invalid arguments', async()=>{
+      await expect(users.create()).to.eventually.be.rejectedWith('Invalid arguments');
+      await expect(users.create({name: 'foo'})).to.eventually.be.rejectedWith('Invalid arguments');
+      await expect(users.create({email: 'foo@bar.com'})).to.eventually.be.rejectedWith('Invalid arguments');
+    });
+
+    it('shold call User with new', ()=>{
+      expect(FakeUserClass).to.have.been.calledWithNew;
+      expect(FakeUserClass).to.have.been.calledWith(sampleUser);
+    });
+
+    it('should save the user', ()=> {
+      expect(saveStub).to.have.been.called;
+    });
+    
+    it('should call mailer with email and name', ()=>{
+      expect(mailerStub).to.have.been.calledWith(sampleUser.email, sampleUser.name);
+    });
+
+    it('should reject errors', async()=>{
+      saveStub.rejects(new Error('fake'));
+
+      await expect(users.create(sampleUser)).to.eventually.be.rejectedWith('fake');
     });
   });
 });

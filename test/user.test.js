@@ -15,6 +15,7 @@ describe('users', ()=> {
   let findStub;
   let sampleArgs;
   let sampleUser;
+  let deleteStub;
 
   beforeEach(()=>{
     sampleUser = {
@@ -23,6 +24,7 @@ describe('users', ()=> {
       email: 'foo@mail.com'
     };
     findStub = sandbox.stub(mongoose.Model, 'findById').resolves(sampleUser);
+    deleteStub = sandbox.stub(mongoose.Model, 'remove').resolves('fake_remove_result');
   });
 
   afterEach(()=>{
@@ -64,5 +66,27 @@ describe('users', ()=> {
         done();
       });
     });
-  })
+  });
+
+  context('delete user', ()=> {
+    it('should check for an id using return', ()=> {
+      return users.delete().then((result)=> {
+        throw new Error('unexpected success')
+      }).catch((ex)=>{
+        expect(ex).to.be.instanceof(Error);
+        expect(ex.message).to.equal('Invalid id');
+      });
+    });
+
+    it('should check for error using eventually', ()=>{
+      return expect(users.delete()).to.eventually.to.be.rejectedWith('Invalid id')
+    });
+
+    it('should Call User.remove', async()=> {
+      let result = await users.delete(123);
+
+      expect(result).to.equal('fake_remove_result');
+      expect(deleteStub).to.have.been.calledWith({_id: 123});
+    });
+  });
 });

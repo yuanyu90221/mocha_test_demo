@@ -24,7 +24,8 @@ describe('users', ()=> {
     sampleUser = {
       id: 123,
       name: 'foo',
-      email: 'foo@mail.com'
+      email: 'foo@mail.com',
+      save: sandbox.stub().resolves()
     };
     findStub = sandbox.stub(mongoose.Model, 'findById').resolves(sampleUser);
     deleteStub = sandbox.stub(mongoose.Model, 'remove').resolves('fake_remove_result');
@@ -36,7 +37,7 @@ describe('users', ()=> {
     users = rewire('../lib/users');
   });
 
-  context('get', () => {
+  context('get', ()=>{
     it('should check for an id', (done)=>{
       users.get(null, (err, result)=>{
         expect(err).to.exist;
@@ -73,7 +74,7 @@ describe('users', ()=> {
     });
   });
 
-  context('delete user', ()=> {
+  context('delete user', ()=>{
     it('should check for an id using return', ()=> {
       return users.delete().then((result)=> {
         throw new Error('unexpected success')
@@ -95,7 +96,7 @@ describe('users', ()=> {
     });
   });
 
-  context('create user', ()=> {
+  context('create user', ()=>{
     let FakeUserClass, saveStub, result;
     beforeEach(async()=>{
       saveStub = sandbox.stub().resolves(sampleUser);
@@ -130,4 +131,33 @@ describe('users', ()=> {
       await expect(users.create(sampleUser)).to.eventually.be.rejectedWith('fake');
     });
   });
+
+  context('update user', ()=>{
+    it('should find user by id', async ()=>{
+      await users.update(123, {age: 35});
+
+      expect(findStub).to.have.been.calledWith(123);
+
+    });
+
+    it('should call user.save', async ()=>{
+      await users.update(123, {age:35});
+
+      expect(sampleUser.save).to.have.been.calledOnce;
+    });
+
+    it('should reject if there is an error', async()=>{        
+        try {
+          findStub.throws(new Error('fake'));
+          // findStub.onError = (e) => {}
+          // findStub.rejects(new Error('fake'));
+          await expect(users.update(123, {age: 35})).to.eventually.be.rejectedWith('fake');        
+        } catch (e) {
+          // console.error(e.toString());
+          throw e;
+        }
+    });
+  
+  });
+
 });

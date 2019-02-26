@@ -160,4 +160,21 @@ describe('users', ()=> {
   
   });
 
+  context('reset password', ()=> {
+    let resetStub;
+    beforeEach(()=>{
+      resetStub = sandbox.stub(mailer, 'sendPasswordResetEmail').resolves('reset');
+    });
+
+    it('should check for email', async()=>{
+      await expect(users.resetPassword()).to.eventually.be.rejectedWith('Invalid email');
+
+    });
+
+    it('should call sendPasswordResetEmail', async()=>{
+      await users.resetPassword('foo@gmail.com');
+
+      expect(resetStub).to.have.been.calledWith('foo@gmail.com');
+    });
+  });
 });

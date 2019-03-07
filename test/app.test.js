@@ -64,4 +64,29 @@ describe('app', ()=>{
         });
     });
   });
+
+  context('DELETE /user/:id', ()=>{
+    let authStub, deleteStub, fakeAuth;
+    beforeEach(()=>{
+      fakeAuth = (req, res, next) => {
+        return next();
+      };
+
+      authStub = sandbox.stub(auth, 'isAuthorized').callsFake(fakeAuth);
+      app = rewire('../lib/app'); 
+    }); 
+
+    it('should call auth check function and user.delete on success', (done)=>{
+      deleteStub = sandbox.stub(users, 'delete').resolves('fake_delete');
+
+      request(app).delete('/user/123')
+        .expect(200)
+        .end((err, response)=> {
+          expect(authStub).to.have.been.calledOnce;
+          expect(deleteStub).to.have.been.calledWithMatch(123);
+          expect(response.body).to.equal('fake_delete');
+          done(err);
+        });
+    });
+  });
 });

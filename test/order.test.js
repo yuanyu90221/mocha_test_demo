@@ -75,5 +75,6 @@ describe('order', ()=>{
     let result = o.ship();
 
     expect(o.status).to.equal('Shipped');
+    expect(dateSpy).to.have.been.calledThrice;
   });
 });

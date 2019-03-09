@@ -57,6 +57,17 @@ describe('order', ()=>{
     expect(result).to.be.a('Object');
     expect(result).to.have.property('user').to.equal('foo');
     expect(result).to.have.property('updatedAt').to.be.a('Number');
-    
+
+  });
+
+  it('should cancel an order, update status and set shipping and total to zero', ()=>{
+    let result = o.cancel();
+
+    expect(warnStub).to.have.been.calledWith('Order cancelled');
+    expect(dateSpy).to.have.been.calledThrice;
+    expect(o.status).to.equal('Cancelled');
+    expect(result).to.be.true;
+    expect(o.shipping).to.equal(0);
+    expect(o.total).to.equal(0);
   });
 });
